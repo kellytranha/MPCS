@@ -3,10 +3,9 @@ import os
 
 import reservation as res
 import json
-# if __name__ == '__main__':
-#     app = res.App()
-#     app.make()
-def object_decoder(obj):
+
+# object decoder
+def decoder(obj):
     if '__type__' in obj:
         if obj['__type__'] == 'schedule':
             start = datetime.strptime(obj['start'], '%Y/%m/%d-%H:%M')
@@ -30,7 +29,7 @@ def object_decoder(obj):
     else:
         return obj
 
-
+# make reservations
 def make_re(app:res.App):
 
     client = input('Enter client name: ')
@@ -70,9 +69,10 @@ def make_re(app:res.App):
     end = input('Enter time end reservation(YYYY/mm/dd-HH:MM): ')
 
     s = res.Schedule(start=datetime.strptime(start, '%Y/%m/%d-%H:%M'), end=datetime.strptime(end, '%Y/%m/%d-%H:%M'))
-    app.make(client,s,item)
+    app.make_re(client,s,item)
 
-def cancel_re(app: res.App):
+# cancel reservations
+def c_re(app: res.App):
     print('Cancel a reservation')
     print('=====================')
     client = input('Enter client name:')
@@ -92,6 +92,7 @@ def cancel_re(app: res.App):
     else:
         print(f'Client {client} have no reservations')
 
+# generate reservation report
 def report(app: res.App):
     print('Reservation report')
     print('=========================')
@@ -110,6 +111,7 @@ def report(app: res.App):
     else:
         print(f'No reservation on given date range: {start} - {end}')
 
+# list financial transactions
 def finrp(app: res.App):
     print('Financial Transactions Report')
     print('==========================')
@@ -130,24 +132,18 @@ def finrp(app: res.App):
             total +=o.tcost(endd)
             total += o.dcost()
         print(f'Total Revenue: {total}')
-
-
     else:
         print(f'No reservation on given date range: {start} - {end}')
 
-
-
-
-
-    pass
-def clientrp(app:res.App):
+# list reservations by client
+def clntrp(app:res.App):
     print('Reservation report for client')
     print('=========================')
     print('Enter date range')
     client = input("Client name:")
     start = input('Start date(YYYY/mm/dd): ')
     end = input('End date(YYYY/mm/dd): ')
-    orders = app.clientrp(client,start=datetime.strptime(start, '%Y/%m/%d'), end=datetime.strptime(end, '%Y/%m/%d'))
+    orders = app.clntrp(client,start=datetime.strptime(start, '%Y/%m/%d'), end=datetime.strptime(end, '%Y/%m/%d'))
     if orders:
         print('======================================================================================')
         print(f' Client Report: {client}   [{start} to {end}]                                            ')
@@ -158,7 +154,6 @@ def clientrp(app:res.App):
 
     else:
         print(f'No reservation on given date range: {start} - {end}')
-
 
 if __name__ == '__main__':
     print('MPCS, Inc. - Laboratory Coworking Space Provider Management Application')
@@ -176,19 +171,21 @@ if __name__ == '__main__':
     tmp = os.path.isfile('reservation.json')
     if tmp:
         with open('reservation.json') as json_file:
-            data=json.load(json_file,object_hook=object_decoder)
-    app = res.App(data);
+            data=json.load(json_file,object_hook=decoder)
+    app = res.App(data)
 
     if option == '1':
         make_re(app)
 
     elif option == '2':
-        cancel_re(app)
+        c_re(app)
 
     elif option == '3':
         report(app)
+    
     elif option == '4':
         finrp(app)
+        
     # assume users choose 1-5
     else:
-        clientrp(app)
+        clntrp(app)
